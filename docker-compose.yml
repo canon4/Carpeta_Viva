@@ -1,0 +1,70 @@
+# Demo local y base para el VPS. Frontend y backend se despliegan por separado.
+name: carpeta-viva
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  fuseki:
+    image: secoresearch/fuseki:6.2.0
+    restart: unless-stopped
+    environment:
+      ADMIN_PASSWORD: ${FUSEKI_ADMIN_PASSWORD}
+      ENABLE_DATA_WRITE: "true"
+      ENABLE_UPDATE: "true"
+    volumes:
+      - fuseki_databases:/fuseki-base/databases
+      - fuseki_configuration:/fuseki-base/configuration
+      - fuseki_backups:/fuseki-base/backups
+    ports:
+      - "127.0.0.1:3030:3030"
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      fuseki:
+        condition: service_started
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET}
+      FUSEKI_URL: http://fuseki:3030/ds
+      CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:8080"]}
+    volumes:
+      - archivos:/data/archivos
+
+  frontend:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      - backend
+    volumes:
+      - ${FRONTEND_DIST:-./frontend/dist/frontend/browser}:/usr/share/nginx/html:ro
+      - ./infra/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "8080:80"
+
+volumes:
+  pgdata:
+  fuseki_databases:
+  fuseki_configuration:
+  fuseki_backups:
+  archivos:

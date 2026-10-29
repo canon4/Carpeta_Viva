@@ -1,0 +1,199 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://www.sistemaicbf/"
+     xml:base="http://www.sistemaicbf/"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <owl:Ontology rdf:about="http://www.sistemaicbf"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.sistemaicbf#Asignado_a -->
+
+    <owl:ObjectProperty rdf:about="http://www.sistemaicbf#Asignado_a">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.sistemaicbf#Condicion_menor -->
+
+    <owl:ObjectProperty rdf:about="http://www.sistemaicbf#Condicion_menor">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.sistemaicbf#Escrito_por -->
+
+    <owl:ObjectProperty rdf:about="http://www.sistemaicbf#Escrito_por">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.sistemaicbf#Evaluado_por -->
+
+    <owl:ObjectProperty rdf:about="http://www.sistemaicbf#Evaluado_por">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.sistemaicbf#Sobre_el_menor -->
+
+    <owl:ObjectProperty rdf:about="http://www.sistemaicbf#Sobre_el_menor">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.sistemaicbf#tieneUn -->
+
+    <owl:ObjectProperty rdf:about="http://www.sistemaicbf#tieneUn">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.sistemaicbf#Capacidad_maxima -->
+
+    <owl:DatatypeProperty rdf:about="http://www.sistemaicbf#Capacidad_maxima">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.sistemaicbf#Categoria_reporte -->
+
+    <owl:DatatypeProperty rdf:about="http://www.sistemaicbf#Categoria_reporte">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.sistemaicbf#estado_proceso -->
+
+    <owl:DatatypeProperty rdf:about="http://www.sistemaicbf#estado_proceso">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.sistemaicbf#fecha_evento -->
+
+    <owl:DatatypeProperty rdf:about="http://www.sistemaicbf#fecha_evento">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.sistemaicbf#nivel_de_riesgo -->
+
+    <owl:DatatypeProperty rdf:about="http://www.sistemaicbf#nivel_de_riesgo">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.sistemaicbf#Asignacion -->
+
+    <owl:Class rdf:about="http://www.sistemaicbf#Asignacion"/>
+    
+
+
+    <!-- http://www.sistemaicbf#Hogar_sustituto -->
+
+    <owl:Class rdf:about="http://www.sistemaicbf#Hogar_sustituto"/>
+    
+
+
+    <!-- http://www.sistemaicbf#Madre_sustituta -->
+
+    <owl:Class rdf:about="http://www.sistemaicbf#Madre_sustituta"/>
+    
+
+
+    <!-- http://www.sistemaicbf#Menor -->
+
+    <owl:Class rdf:about="http://www.sistemaicbf#Menor"/>
+    
+
+
+    <!-- http://www.sistemaicbf#Profesional -->
+
+    <owl:Class rdf:about="http://www.sistemaicbf#Profesional"/>
+    
+
+
+    <!-- http://www.sistemaicbf#Reporte -->
+
+    <owl:Class rdf:about="http://www.sistemaicbf#Reporte"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.sistemaicbf#Madre1 -->
+
+    <owl:NamedIndividual rdf:about="http://www.sistemaicbf#Madre1">
+        <rdf:type rdf:resource="http://www.sistemaicbf#Madre_sustituta"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.sistemaicbf#hogar1 -->
+
+    <owl:NamedIndividual rdf:about="http://www.sistemaicbf#hogar1">
+        <rdf:type rdf:resource="http://www.sistemaicbf#Hogar_sustituto"/>
+    </owl:NamedIndividual>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi -->
+

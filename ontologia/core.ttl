@@ -1,0 +1,71 @@
+@prefix :     <http://www.sistemaicbf#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# Ontología núcleo (8 clases) para el avance del 30/10/2026.
+# Parte de Contexto/SistemaICBF.rdf y del modelo ER de Contexto/ICBF.pdf.
+# Privacidad: el grafo guarda identificadores, relaciones y metadatos. No guarda nombres, documentos
+# de identidad, direcciones, teléfonos, fechas de nacimiento ni contenido de documentos.
+
+<http://www.sistemaicbf> a owl:Ontology ;
+    rdfs:label "Ontología núcleo del sistema de gestión documental para hogares sustitutos"@es ;
+    owl:versionInfo "0.1.0" .
+
+# ---------- Clases ----------
+:Zona            a owl:Class ; rdfs:label "Zona"@es ;
+    rdfs:comment "Agrupación geográfica de hogares sustitutos (zona 1, zona 2...)."@es .
+:Hogar_sustituto a owl:Class ; rdfs:label "Hogar sustituto"@es .
+:Madre_sustituta a owl:Class ; rdfs:label "Madre sustituta"@es .
+:Menor           a owl:Class ; rdfs:label "Menor (niño, niña o adolescente)"@es .
+:Asignacion      a owl:Class ; rdfs:label "Asignación"@es ;
+    rdfs:comment "Vincula un menor con un hogar durante un periodo."@es .
+:Profesional     a owl:Class ; rdfs:label "Profesional"@es ;
+    rdfs:comment "Defensor, psicosocial, nutricionista, trabajador social."@es .
+:Reporte         a owl:Class ; rdfs:label "Reporte"@es .
+:Documento       a owl:Class ; rdfs:label "Documento"@es .
+
+# ---------- Relaciones ----------
+:tieneHogar a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "tiene hogar"@es ; rdfs:domain :Madre_sustituta ; rdfs:range :Hogar_sustituto .
+:perteneceAZona a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "pertenece a zona"@es ; rdfs:domain :Hogar_sustituto ; rdfs:range :Zona .
+:delMenor a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "del menor"@es ; rdfs:domain :Asignacion ; rdfs:range :Menor .
+:tieneAsignacion a owl:ObjectProperty ;
+    rdfs:label "tiene asignación"@es ; owl:inverseOf :delMenor .
+:enHogar a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "en hogar"@es ; rdfs:domain :Asignacion ; rdfs:range :Hogar_sustituto .
+:atiende a owl:ObjectProperty ;
+    rdfs:label "atiende"@es ; rdfs:domain :Profesional ; rdfs:range :Menor .
+:atendidoPor a owl:ObjectProperty ;
+    rdfs:label "atendido por"@es ; owl:inverseOf :atiende .
+:sobreMenor a owl:ObjectProperty ;
+    rdfs:label "sobre el menor"@es ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( :Reporte :Documento ) ] ; rdfs:range :Menor .
+:sobreHogar a owl:ObjectProperty ;
+    rdfs:label "sobre el hogar"@es ; rdfs:domain :Documento ; rdfs:range :Hogar_sustituto .
+:escritoPor a owl:ObjectProperty ;
+    rdfs:label "escrito por"@es ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( :Reporte :Documento ) ] ;
+    rdfs:range  [ a owl:Class ; owl:unionOf ( :Madre_sustituta :Profesional ) ] .
+:revisadoPor a owl:ObjectProperty ;
+    rdfs:label "revisado por"@es ; rdfs:domain :Documento ; rdfs:range :Profesional .
+
+# ---------- Propiedades de datos (solo metadatos) ----------
+:estado a owl:DatatypeProperty ; rdfs:label "estado"@es ; rdfs:range xsd:string .
+:version a owl:DatatypeProperty ; rdfs:label "versión"@es ; rdfs:range xsd:integer .
+:fechaCreacion a owl:DatatypeProperty ; rdfs:label "fecha de creación"@es ; rdfs:range xsd:dateTime .
+:fechaInicio a owl:DatatypeProperty ; rdfs:domain :Asignacion ; rdfs:range xsd:date .
+:fechaFin a owl:DatatypeProperty ; rdfs:domain :Asignacion ; rdfs:range xsd:date .
+:capacidadMaxima a owl:DatatypeProperty ; rdfs:domain :Hogar_sustituto ; rdfs:range xsd:integer .
+:fechaHabilitacion a owl:DatatypeProperty ; rdfs:domain :Hogar_sustituto ; rdfs:range xsd:date .
+:estadoCertificacion a owl:DatatypeProperty ; rdfs:domain :Madre_sustituta ; rdfs:range xsd:string .
+:cargo a owl:DatatypeProperty ; rdfs:domain :Profesional ; rdfs:range xsd:string .
+:categoria a owl:DatatypeProperty ; rdfs:domain :Documento ; rdfs:range xsd:string .
+:estadoFlujo a owl:DatatypeProperty ; rdfs:domain :Documento ; rdfs:range xsd:string .
+:esSensible a owl:DatatypeProperty ; rdfs:domain :Documento ; rdfs:range xsd:boolean ;
+    rdfs:comment "Marca documentos de salud o psicología para el filtrado por permisos."@es .
+:tipoReporte a owl:DatatypeProperty ; rdfs:domain :Reporte ; rdfs:range xsd:string .
+:nivelDeRiesgo a owl:DatatypeProperty ; rdfs:domain :Reporte ; rdfs:range xsd:string .

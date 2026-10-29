@@ -1,0 +1,32 @@
+# Consultas de competencia. Cada bloque se separa con una línea "### nombre".
+
+### documentos_salud_menor_001
+PREFIX : <http://www.sistemaicbf#>
+PREFIX id: <http://www.sistemaicbf/id/>
+SELECT ?doc ?fecha WHERE {
+  ?doc a :Documento ; :sobreMenor id:menor-001 ; :categoria "salud" ; :fechaCreacion ?fecha .
+}
+
+### menores_con_asignacion_vigente_en_hogar_01
+PREFIX : <http://www.sistemaicbf#>
+PREFIX id: <http://www.sistemaicbf/id/>
+SELECT ?menor WHERE {
+  ?a a :Asignacion ; :delMenor ?menor ; :enHogar id:hogar-01 ; :estado "vigente" .
+}
+
+### menores_sin_informe_psicosocial_reciente
+PREFIX : <http://www.sistemaicbf#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+SELECT ?menor WHERE {
+  ?a a :Asignacion ; :delMenor ?menor ; :estado "vigente" .
+  FILTER NOT EXISTS {
+    ?d a :Documento ; :sobreMenor ?menor ; :categoria "informe_psicosocial" ; :fechaCreacion ?f .
+    FILTER (?f >= "2026-08-30T00:00:00"^^xsd:dateTime)
+  }
+}
+
+### hogares_por_zona
+PREFIX : <http://www.sistemaicbf#>
+SELECT ?zona (COUNT(?hogar) AS ?hogares) WHERE {
+  ?hogar a :Hogar_sustituto ; :perteneceAZona ?zona .
+} GROUP BY ?zona

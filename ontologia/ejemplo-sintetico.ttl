@@ -1,0 +1,34 @@
+@prefix :     <http://www.sistemaicbf#> .
+@prefix id:   <http://www.sistemaicbf/id/> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# Datos sintéticos. Ninguna persona real.
+id:zona-1 a :Zona .
+
+id:hogar-01 a :Hogar_sustituto ; :perteneceAZona id:zona-1 ; :capacidadMaxima 6 ; :fechaHabilitacion "2024-03-01"^^xsd:date ; :estado "activo" .
+id:hogar-02 a :Hogar_sustituto ; :perteneceAZona id:zona-1 ; :capacidadMaxima 6 ; :estado "activo" .
+
+id:madre-01 a :Madre_sustituta ; :tieneHogar id:hogar-01 ; :estadoCertificacion "vigente" .
+id:madre-02 a :Madre_sustituta ; :tieneHogar id:hogar-02 ; :estadoCertificacion "vigente" .
+
+id:prof-defensor a :Profesional ; :cargo "defensor" ; :atiende id:menor-001, id:menor-002, id:menor-003 .
+id:prof-psicosocial a :Profesional ; :cargo "psicosocial" ; :atiende id:menor-001, id:menor-002 .
+
+id:menor-001 a :Menor ; :estado "activo" .
+id:menor-002 a :Menor ; :estado "activo" .
+id:menor-003 a :Menor ; :estado "activo" .
+
+id:asig-001 a :Asignacion ; :delMenor id:menor-001 ; :enHogar id:hogar-01 ; :fechaInicio "2026-07-01"^^xsd:date ; :estado "vigente" .
+id:asig-002 a :Asignacion ; :delMenor id:menor-002 ; :enHogar id:hogar-01 ; :fechaInicio "2026-08-15"^^xsd:date ; :estado "vigente" .
+id:asig-003 a :Asignacion ; :delMenor id:menor-003 ; :enHogar id:hogar-02 ; :fechaInicio "2026-05-02"^^xsd:date ; :fechaFin "2026-09-20"^^xsd:date ; :estado "cerrada" .
+
+id:doc-001 a :Documento ; :sobreMenor id:menor-001 ; :escritoPor id:madre-01 ; :revisadoPor id:prof-psicosocial ;
+    :categoria "informe_psicosocial" ; :estadoFlujo "aprobado" ; :esSensible true ; :version 1 ; :fechaCreacion "2026-10-10T09:00:00"^^xsd:dateTime .
+id:doc-002 a :Documento ; :sobreMenor id:menor-001 ; :escritoPor id:madre-01 ;
+    :categoria "salud" ; :estadoFlujo "en_revision" ; :esSensible true ; :version 1 ; :fechaCreacion "2026-10-20T15:30:00"^^xsd:dateTime .
+id:doc-003 a :Documento ; :sobreMenor id:menor-002 ; :escritoPor id:madre-01 ;
+    :categoria "informe_psicosocial" ; :estadoFlujo "aprobado" ; :esSensible true ; :version 1 ; :fechaCreacion "2026-08-20T10:00:00"^^xsd:dateTime .
+id:doc-004 a :Documento ; :sobreHogar id:hogar-01 ; :escritoPor id:madre-01 ;
+    :categoria "inventario" ; :estadoFlujo "aprobado" ; :esSensible false ; :version 2 ; :fechaCreacion "2026-10-01T08:00:00"^^xsd:dateTime .
+
+id:rep-001 a :Reporte ; :sobreMenor id:menor-002 ; :escritoPor id:madre-01 ; :tipoReporte "seguimiento" ; :nivelDeRiesgo "bajo" ; :fechaCreacion "2026-10-25T18:00:00"^^xsd:dateTime .

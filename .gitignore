@@ -1,0 +1,15 @@
+# Repositorios independientes anidados (se clonan aparte con scripts/bootstrap)
+/backend/
+/frontend/
+
+# Entorno y secretos
+.env
+*.pem
+*.key
+
+# Sistema y herramientas
+.DS_Store
+Thumbs.db
+__pycache__/
+node_modules/
+.venv/
