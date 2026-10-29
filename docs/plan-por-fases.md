@@ -17,7 +17,7 @@ Pendiente
 - [ ] Probar la migración y las pruebas contra PostgreSQL real (hasta ahora solo SQLite).
 - [ ] Cargar `ontologia/core.ttl` en Fuseki (agente datos-infra).
 - [ ] Instalar Graphify (`uv tool install graphifyy`, `graphify install --project`) y generar el grafo inicial (`/graphify .`) sobre Carpeta_Viva con datos sintéticos.
-- [ ] Crear repositorios remotos y definir `BACKEND_REPO_URL` y `FRONTEND_REPO_URL` en `.env`.
+- [x] Crear repositorios remotos y definir `BACKEND_REPO_URL` y `FRONTEND_REPO_URL` en `.env` (`canon4/carpeta-viva-backend`, `canon4/carpeta-viva-frontend`).
 - [ ] Nombre y marca del producto (Diego).
 
 ## Fase 1. Base de permisos
