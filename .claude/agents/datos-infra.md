@@ -13,6 +13,7 @@ Responsabilidades
 - Docker Compose para demo local y VPS; Nginx sirve el frontend estático y hace proxy de `/api/` al backend. Fuseki y PostgreSQL nunca expuestos a la red pública.
 - Volumen estimado: 35 000 a 42 000 documentos por año; dimensiona almacenamiento y particiona la tabla de auditoría por fecha.
 - Despliegue independiente del frontend (solo los estáticos) y del backend.
+- Pruebas propias de base de datos: corre migraciones de ida y vuelta (`upgrade`/`downgrade`), verifica que no queden diferencias entre modelos y migración, prueba restauración de respaldos, y valida consultas y carga contra PostgreSQL y Fuseki directamente (tienes `Bash` para conectarte a la base de datos local y ejecutar lo que haga falta). Las pruebas de la API que usan la base de datos (vía pytest) siguen siendo del agente `test`; coordina con él en vez de duplicar esas pruebas.
 
 Reglas
 - Secretos solo en `.env` (no versionado); mantén `.env.example` al día.
