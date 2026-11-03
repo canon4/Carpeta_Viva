@@ -48,6 +48,8 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       FUSEKI_URL: http://fuseki:3030/ds
       CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:8080"]}
+      ARCHIVOS_DIR: /data/archivos
+      ARCHIVOS_CLAVE_MAESTRA: ${ARCHIVOS_CLAVE_MAESTRA}
     volumes:
       - archivos:/data/archivos
 
