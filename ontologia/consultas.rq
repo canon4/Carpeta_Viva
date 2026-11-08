@@ -15,12 +15,17 @@ SELECT ?menor WHERE {
 }
 
 ### menores_sin_informe_psicosocial_reciente
+# Corregida por ADR-0010 (sección 1.7): la versión anterior apuntaba a :Documento/:categoria
+# "informe_psicosocial", pero ADR-0008 fija la categoría real de Documento como "psicosocial" y
+# el informe psicosocial recurrente se modela como Reporte.tipoReporte (ADR-0007 sección 1), no
+# como Documento.categoria. Se corrige para apuntar a :Reporte/:tipoReporte. La fecha límite
+# (hoy - 60 días) la calcula la capa de aplicación al construir la consulta, no queda fija aquí.
 PREFIX : <http://www.sistemaicbf#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 SELECT ?menor WHERE {
   ?a a :Asignacion ; :delMenor ?menor ; :estado "vigente" .
   FILTER NOT EXISTS {
-    ?d a :Documento ; :sobreMenor ?menor ; :categoria "informe_psicosocial" ; :fechaCreacion ?f .
+    ?r a :Reporte ; :sobreMenor ?menor ; :tipoReporte "informe_psicosocial" ; :fechaCreacion ?f .
     FILTER (?f >= "2026-08-30T00:00:00"^^xsd:dateTime)
   }
 }
