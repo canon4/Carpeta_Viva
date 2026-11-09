@@ -1,6 +1,21 @@
 # Guía rápida para trabajar en el frontend
 
-No se necesita Docker para desarrollar el frontend. Esto deja un backend local con los mismos datos de demo que usa el resto del equipo.
+No se necesita Docker para desarrollar el frontend.
+
+## 0. Base de datos: compartida o local
+
+Hay una base de datos Postgres+pgvector ya corriendo en el VPS de clase, con las migraciones
+aplicadas y los usuarios de demo sembrados (misma tabla que la sección 2). Es la forma más rápida
+de trabajar con los mismos datos sin instalar nada más:
+
+- Pide la cadena de conexión (archivo `CREDENCIALES-VPS.md`, no está en git — pídesela
+  directamente a Diego por un canal privado).
+- En `backend/.env`, pon esa línea como `DATABASE_URL` y sáltate `alembic upgrade head` y
+  `python scripts/seed_sintetico.py` del paso 1 (la base ya los tiene).
+- Solo datos sintéticos, como en cualquier otro entorno de este proyecto.
+
+Si prefieres tu propia base local (por ejemplo para probar una migración nueva sin afectar a
+nadie más), sigue el paso 1 tal cual.
 
 ## 1. Backend local
 
