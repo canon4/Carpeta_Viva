@@ -1,6 +1,6 @@
 # Módulos
 
-Doce módulos de negocio y tres transversales. Una carpeta por módulo en `backend/app/modules/` y en `frontend/src/app/modules/`.
+Doce módulos de negocio y cuatro transversales. Una carpeta por módulo en `backend/app/modules/` y en `frontend/src/app/modules/`.
 
 | # | Módulo | Qué hace | Fase |
 |---|---|---|---|
@@ -19,6 +19,7 @@ Doce módulos de negocio y tres transversales. Una carpeta por módulo en `backe
 | T1 | Asistente de IA | Busca, resume y clasifica con citas; OCR; consulta solo por la capa de aplicación. | 5 |
 | T2 | Auditoría | Registra todo acceso a expedientes y los eventos de sesión. Desde la fase 1. | 1 |
 | T3 | Archivo y Cierre | Archiva el expediente al cierre y lo exporta al destino por definir. | 5 |
+| T4 | Configuración administrable | Catálogos de opciones (categorías documentales, parentescos, tipos de inventario, niveles de informe) y parámetros de negocio (umbrales de alerta, datos institucionales, textos) editables por `admin` sin redesplegar. Lo usan los demás módulos por su capa de aplicación; nunca contiene lógica de negocio propia (ADR-0013). | 3 |
 
 ## Vistas por rol (no hay módulo aparte)
 - Madre: sus NNA asignados, documentos propios, inventario, alimentos, citas, alertas.
