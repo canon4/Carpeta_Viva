@@ -1,6 +1,7 @@
 # ADR-0014 Separa pedido y recepción en Inventario; checklist reutilizable en Alimentos
 
-Estado: Propuesta.
+Estado: Aceptada, con el ajuste de la sección 2.1 (revisión de `seguridad`, 2026-11-14)
+incorporado a la decisión sobre fotos de inventario.
 
 ## Contexto
 
@@ -78,6 +79,38 @@ fotos por ítem (suficiente para dejar constancia sin convertir esto en otro mó
 - Sin `DELETE`: una foto subida por error se queda (es evidencia), igual criterio de "nunca se
   borra" del resto del sistema.
 
+### 2.1 Revisión de `seguridad` (2026-11-14) y corrección incorporada
+
+Revisión puntual sobre el mecanismo de fotos de la sección 2: una foto de una cama o un mueble
+puede captar de forma incidental a un NNA del hogar (jugando donde se tomó la foto), lo que la
+convertiría en dato personal identificable de un menor sin pasar por el control de acceso por
+expediente/sección que protege justamente eso (ADR-0007/0008) — `puede_ver_hogar` es más amplio
+que eso a propósito (incluye a cualquier profesional/defensor con *algún* menor asignado a ese
+hogar, no necesariamente al que aparecería en la foto). Conclusión: el diseño original de la
+sección 2 no queda cerrado sin dos ajustes:
+
+- **Declaración obligatoria al subir, con registro auditable**: el formulario de subida exige
+  marcar "confirmo que esta foto no muestra a ningún NNA" antes de habilitar el envío (mitigación
+  de UI, sin detección facial automática — fuera de alcance de este proyecto). El backend recibe
+  y exige `declaracion_sin_menores: true` en `POST /inventario/items/{id}/fotos`; rechaza con 422
+  si llega en `false` o ausente, para que quede un registro auditable de que quien subió la foto
+  hizo la declaración en cada subida, no solo un aviso visual que se pueda ignorar.
+- **Acotar quién puede ver las fotos**: `GET /inventario/items/{id}/fotos` y
+  `.../fotos/{foto_id}` dejan de usar `puede_ver_hogar` (todo profesional/defensor con acceso al
+  hogar) y pasan a exigir rol madre (del hogar), admin o auditor. Un coordinador o un
+  profesional/defensor que necesite confirmar que algo llegó ya tiene el campo `estado` (texto)
+  del ítem, que no expone contenido fotográfico de un hogar que puede incluir a NNA no asignados
+  a ellos; no necesitan ver la foto en sí.
+- **Procedimiento de remediación para una foto subida por error**: como el resto del sistema
+  "nunca se borra físico", una foto que termine mostrando a un NNA sin querer quedaría expuesta
+  permanentemente sin esta pieza. Se agrega `oculta: bool` (default `false`) a
+  `inventario_item_fotos`; `PUT /inventario/items/{id}/fotos/{foto_id}/ocultar` (solo admin) la
+  marca `oculta=true` (análogo a RF7, ocultar sin borrar) y a partir de ahí deja de aparecer en
+  `GET .../fotos` ni ser servible por `GET .../fotos/{foto_id}` para nadie excepto admin.
+- Sin cambios sobre el punto 3 de la revisión (ausencia de hash de integridad en
+  `inventario_item_fotos`): se acepta tal cual, por ser evidencia operativa puntual sin valor
+  probatorio formal como el expediente oficial.
+
 ### 3. Migración de ítems existentes
 
 Los `InventarioItem` ya creados antes de esta ADR se migran con `recibido=true` (se asume que lo
@@ -150,3 +183,8 @@ la madre, y admin/coordinador):
 - Mitiga directamente lo que señaló el usuario: el coordinador deja de poder "hacerse pasar por
   madre" confirmando que algo llegó bien sin que ella lo haya visto, y comprar de nuevo un
   producto del mercado deja de exigir reescribir todo.
+- Revisión de `seguridad` completada (sección 2.1, 2026-11-14): `inventario_item_fotos` gana
+  `declaracion_sin_menores` (obligatoria, auditable) y `oculta` (remediación admin-only); la
+  lectura de fotos se acota a madre/admin/auditor en vez de todo `puede_ver_hogar`. El backend ya
+  implementado (commit `301d251`) debe actualizarse con este ajuste antes de construir el
+  frontend de subida de fotos.
