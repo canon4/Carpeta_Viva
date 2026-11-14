@@ -1,8 +1,8 @@
 # ADR-0013 Módulo transversal de configuración administrable
 
-Estado: Aceptada. Un punto queda condicionado a revisión de `seguridad` antes de que `backend`
-construya la migración de categorías documentales (ver sección 5): el resto del diseño no
-depende de esa revisión y puede construirse ya.
+Estado: Aceptada, con el cambio de la sección 5.1 (revisión de `seguridad`, 2026-11-14)
+incorporado a la decisión. `backend` puede construir el módulo completo, incluida la migración
+de categorías documentales (sección 7, punto 1), sin punto pendiente adicional.
 
 ## Contexto
 
@@ -152,13 +152,90 @@ usado) debe devolver `None` (visibilidad básica, nunca una sección sensible) c
 tiene entrada explícita, para que una categoría nueva sin mapear quede en el nivel de
 visibilidad **menos** privilegiado, no en uno más abierto por accidente.
 
-Esto es la única parte de este ADR que toca de forma indirecta el control de acceso a datos de
-menores (la clasificación documental determina quién ve qué del expediente). Por la regla ya
-vigente en `CLAUDE.md` ("todo cambio que toque datos de menores pasa por seguridad"), **queda
-pendiente de revisión de `seguridad`** antes de que `backend` construya la migración del
-catálogo de categorías documentales (primer caso real de la sección 7, punto 1) — no bloquea el
-resto del módulo (tablas, endpoints, parámetros institucionales), que no toca datos de menores
-directamente.
+### 5.1 Revisión de `seguridad` (2026-11-14) y corrección incorporada
+
+Revisión hecha sobre `documentos/domain.py` y `documentos/application.py`
+(`SECCION_POR_CATEGORIA`, `_puede_ver_documento`, `_puede_descargar_contenido`,
+`listar_para_auditor`, ADR-0007/0008/0011). Conclusión: el fallback a `None` es correcto como
+*mecanismo de respaldo*, pero **no es seguro dejarlo como único mecanismo**, porque "visibilidad
+básica" no equivale a "nadie la ve": hoy incluye automáticamente a la madre asignada al menor
+(sin que el profesional habilite nada — `_tiene_permiso_seccion` no se evalúa cuando
+`seccion_de_categoria` devuelve `None`), al coordinador de toda la zona, y al auditor en bloque
+sobre todos los menores (`listar_para_auditor` incluye todo documento con
+`documento.sensible = False`, que es exactamente lo que resulta cuando la categoría no tiene
+mapeo). Esto contradice la regla de negocio ya acordada ("el profesional define qué ve cada
+persona; datos sensibles solo para profesionales y la madre si el profesional lo habilita") si un
+admin crea una categoría que en la práctica es sensible (p.ej. "antecedentes_judiciales" o
+similar) y nadie la mapea a tiempo: queda expuesta por defecto a madre y auditoría de forma
+amplia, no restringida, mientras nadie note la falta de mapeo en código.
+
+Además, el diseño de la sección 6 (la asociación sección-categoría permanece fija en código) deja
+una contradicción con el objetivo central de este ADR ("el admin administra sin depender de
+desarrollo ni de redespliegue"): toda categoría nueva que cree el admin queda **permanentemente**
+en básica hasta que un desarrollador edite `SECCION_POR_CATEGORIA` y redespliegue — justo la
+dependencia que el módulo busca eliminar, aplicada al único catálogo donde el error es más
+costoso.
+
+**Corrección incorporada a la decisión** (no queda como pendiente):
+
+- Los grupos de catálogo que un módulo de negocio asocia a una regla de permisos (hoy
+  `categoria_documento_menor`; `categoria_documento_hogar` no lo necesita porque sus dos valores
+  actuales son ambos básicos) se marcan en el registro de código `GRUPOS_CATALOGO` con un
+  atributo `con_seccion_acceso: true`.
+- Para esos grupos, `catalogos_opciones` gana una columna `seccion_acceso` (string, nullable,
+  valores permitidos limitados al conjunto cerrado ya definido en código —
+  `SECCIONES_VALIDAS = ("familia", "salud", "psicosocial")` más `None`/básica — nunca texto
+  libre).
+- `POST /configuracion/catalogos/{grupo}` exige el campo `seccion_acceso` (puede ser explícitamente
+  básica) cuando el grupo tiene `con_seccion_acceso: true`; la pantalla de "nueva categoría" en el
+  frontend obliga a elegirlo en el momento de crear la opción, no después. Rechaza con 400 si el
+  valor no está en el conjunto cerrado o si el grupo no existe en `GRUPOS_CATALOGO`.
+- `seccion_acceso` es **inmutable tras la creación**: `PUT /configuracion/catalogos/{grupo}/{valor}`
+  solo admite `{etiqueta?, orden?, activo?}`, igual que ya decía la sección 3, y explícitamente
+  **no** admite cambiar `seccion_acceso`. Razón: `Documento.sensible` se calcula una sola vez al
+  crear el documento (`seccion_de_categoria(categoria) is not None`) y no se recalcula
+  retroactivamente; permitir reclasificar una categoría cambiaría en silencio la visibilidad de
+  documentos históricos ya guardados sin dejar rastro claro de qué cambió. Si una categoría quedó
+  mal clasificada, se desactiva (`activo=false`) y se crea una categoría nueva con la sección
+  correcta; los documentos existentes conservan su clasificación original.
+- `documentos/domain.py` sigue leyendo `SECCION_POR_CATEGORIA` como respaldo estático (compatibilidad
+  con las categorías ya fijas: `identidad`, `salud`, `psicosocial`, etc.), pero
+  `seccion_de_categoria` se vuelve: primero busca en el diccionario fijo; si no está, consulta
+  `configuracion.application.seccion_acceso_de_opcion(session, "categoria_documento_menor", valor)`
+  y usa ese valor (validado contra `SECCIONES_VALIDAS`, cualquier valor no reconocido en runtime
+  —fila corrupta, migración manual— cae a `None`, nunca a una sección sensible; este es el
+  *backstop* defensivo, ya no el mecanismo principal). Así una categoría nueva queda clasificada
+  por decisión explícita del admin al crearla, no por omisión de un desarrollador.
+- Auditoría: la creación de una opción de catálogo con `con_seccion_acceso: true` registra el
+  `seccion_acceso` elegido dentro del mismo evento de creación (`registrar_acceso`, acción
+  específica, p.ej. `catalogo_categoria_documental_creada`, con la sección en el detalle) — distinta
+  de la acción genérica de creación de opciones en catálogos sin lógica de permisos. Al ser
+  inmutable, no existe un evento separado de "cambio de sección" que auditar; si esto cambia en el
+  futuro (se permite reclasificar), esa reclasificación debe quedar en una acción de auditoría
+  propia y distinta de "se editó una etiqueta" (p.ej. `catalogo_categoria_documental_reclasificada`
+  con valor anterior y nuevo), precisamente porque afecta visibilidad retroactiva de documentos ya
+  existentes, no solo el nombre mostrado en pantalla.
+- `GET /configuracion/catalogos/{grupo}` (lectura pública para cualquier autenticado): confirmado
+  que las etiquetas de categorías documentales, por sí solas, no son dato personal de un NNA
+  específico ni información sensible — son metadatos de clasificación del sistema que de todas
+  formas necesitan ver todos los roles para poblar formularios de carga. Se mantiene abierto a
+  cualquier autenticado. Nota para el futuro: si algún módulo llega a registrar un grupo de
+  catálogo cuyas etiquetas revelen por sí mismas lógica de control interno no destinada a todos los
+  roles (p.ej. un catálogo que listara literalmente los roles destinatarios de una alerta de
+  evasión), ese grupo específico no debe exponerse por este endpoint genérico sin evaluación
+  puntual; no aplica a los catálogos previstos hoy (categorías documentales, parentescos, tipos de
+  inventario, niveles de informe).
+- Riesgo adicional fuera del alcance de `seccion_acceso`, dejado como nota y no como bloqueo: el
+  valor `telefono_policia_infancia` y otros parámetros de seguridad operativa quedan editables por
+  `admin` sin segundo factor (punto abierto 6 de `CLAUDE.md`: "segundo factor para profesionales;
+  hoy solo usuario y contraseña"). Un error o una cuenta de `admin` comprometida puede alterar un
+  número de emergencia usado en una alerta de evasión. No se resuelve en este ADR, pero debe
+  priorizarse MFA para `admin` antes de producción, no solo para roles profesionales.
+
+Con esta corrección, la regla de seguridad de este ADR deja de depender únicamente de que un
+desarrollador recuerde actualizar un diccionario en código: el admin no puede crear una categoría
+documental sin decidir, en ese mismo momento, su nivel de acceso dentro de un conjunto cerrado ya
+validado por `seguridad`.
 
 ### 6. Qué NO entra en este mecanismo
 
@@ -181,8 +258,9 @@ No se migra todo de una vez. Orden de construcción:
    `categoria_documento_hogar` (seed con los valores/etiquetas actuales de
    `CATEGORIAS_MENOR`/`CATEGORIAS_HOGAR` y de `categorias.ts`). Primero porque ADR-0008 ya las
    marca como "provisionales, pendientes de validar con el operador": es el caso real que más
-   pronto va a necesitar cambiar sin redespliegue. Depende de la revisión de `seguridad` de la
-   sección 5 antes de construirse.
+   pronto va a necesitar cambiar sin redespliegue. Incluye el campo `seccion_acceso` de la
+   sección 5.1 (revisión de `seguridad` ya incorporada) desde la primera migración de este
+   catálogo, no como un paso posterior.
 2. **`telefono_policia_infancia`** → parámetro en `configuracion_sistema`, migrando el valor que
    hoy esté en `configuracion_alertas` (ADR-0009) y retirando esa tabla. No se deja "para
    después": es el caso que motivó esta ADR, y dejarlo en su tabla propia mientras el resto usa
@@ -209,20 +287,27 @@ No se migra todo de una vez. Orden de construcción:
   elimina — `alertas/models.py`, `alertas/repository.py`, `alertas/application.py` y
   `alertas/api.py` pierden el código específico de `ConfiguracionAlertas` y pasan a llamar
   `configuracion.application.obtener_parametro(session, "telefono_policia_infancia")`).
-- `documentos/domain.py` conserva `SECCION_POR_CATEGORIA`/`SECCION_POR_TIPO_REPORTE` fijos en
-  código (lógica de negocio, sección 6), pero `CATEGORIAS_MENOR`/`CATEGORIAS_HOGAR` dejan de ser
-  la fuente de verdad de qué categorías existen: `documentos/application.py` valida la categoría
-  recibida contra `configuracion.application.valor_valido_en_catalogo(session,
-  "categoria_documento_menor"/"categoria_documento_hogar", valor)` antes de aceptar la carga.
+- `documentos/domain.py` conserva `SECCION_POR_CATEGORIA`/`SECCION_POR_TIPO_REPORTE` como
+  respaldo fijo en código para las categorías ya existentes (sección 6), pero
+  `CATEGORIAS_MENOR`/`CATEGORIAS_HOGAR` dejan de ser la fuente de verdad de qué categorías
+  existen: `documentos/application.py` valida la categoría recibida contra
+  `configuracion.application.valor_valido_en_catalogo(session,
+  "categoria_documento_menor"/"categoria_documento_hogar", valor)` antes de aceptar la carga. Para
+  categorías nuevas creadas por `admin`, `seccion_de_categoria` resuelve contra el campo
+  `seccion_acceso` del catálogo (sección 5.1), fijado obligatoriamente por el admin al crear la
+  opción, con `None`/básica solo como respaldo defensivo ante datos corruptos, nunca como
+  mecanismo principal de clasificación.
 - El frontend necesita una pantalla nueva de "Configuración" (solo rol `admin`, dos vistas:
   catálogos y parámetros) y que los formularios que hoy usan listas fijas (`categorias.ts`)
   lean sus opciones desde `GET /configuracion/catalogos/{grupo}` en vez de un arreglo en el
   código — cambio progresivo, con el arreglo actual como valor por defecto embebido si la
   llamada falla (mismo criterio de respaldo que el resto del sistema), no se rehace todo de una
   vez.
-- Pendiente antes de construir el punto 1 de la sección 7: revisión de `seguridad` sobre la
-  regla de la sección 5 (valor de catálogo nuevo sin mapeo de sección cae siempre a visibilidad
-  básica, nunca a una sección sensible por accidente).
+- Revisión de `seguridad` completada (sección 5.1, 2026-11-14): se incorpora `seccion_acceso`
+  como campo obligatorio e inmutable al crear una opción en catálogos con lógica de permisos
+  asociada (`categoria_documento_menor`), con conjunto cerrado de valores validados y el fallback
+  a básica como respaldo defensivo, no como mecanismo principal. Sin punto pendiente para que
+  `backend` construya el punto 1 de la sección 7.
 - Mitiga directamente el riesgo que señaló el usuario: con este módulo, el administrador cambia
   catálogos y parámetros desde la aplicación al entregar el sistema, sin depender del equipo de
   desarrollo ni de un redespliegue.
