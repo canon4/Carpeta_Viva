@@ -156,3 +156,16 @@ Validación solicitada por el arquitecto antes de que `backend` construya. Resul
 - Ningún borrado físico en los siete modelos nuevos: `alertas`/`citas` se cierran con estado; `inventario_items` se marca `retirado`; `hogar_convivientes`/`hogar_red_apoyo` se marcan `activo=false`; `alimentos_items` se marca `consumido`. Coherente con el criterio ya usado en ADR-0007/0008.
 - Resuelto por `seguridad`: citas médicas/psicosociales no requieren `permisos_expediente` sobre toda la fila, pero sí sobre el campo `notas` (ver sección 2 y revisión de seguridad, punto 4) — decisión final, no punto abierto.
 - Resuelto por `seguridad`: una alerta de `tipo=evasion` nunca puede quedar sin destinatarios resolubles; si el defensor/psicosocial asignados no tienen cuenta, se agrega como respaldo el coordinador de zona y, en su defecto, admin (ver sección "Resolución de destinatarios" y revisión de seguridad, punto 1) — decisión final, no punto abierto.
+
+## Actualización (2026-11-13)
+
+`POLICIA_INFANCIA_TELEFONO` era una variable de entorno fija: cambiarla exigía redesplegar el
+backend. Surgió como necesidad real al preparar el despliegue (ver
+`docs/adr/0012-despliegue-dokploy.md`): si el número cambia (nuevo operador, error al
+cargarlo), nadie debería depender de un redespliegue para corregirlo. Se agregó una fila de
+configuración editable (`configuracion_alertas`, migración 0008) con
+`GET/PUT /alertas/configuracion/telefono-policia-infancia`, solo `admin`. Si nunca se edita, la
+app sigue usando la variable de entorno como valor por defecto (sin romper despliegues
+existentes). No se generalizó a una tabla de configuración genérica por varias claves: hoy solo
+hay este valor que necesita ser editable sin redespliegue; si aparece un segundo, vale la pena
+reconsiderar la generalización en ese momento.

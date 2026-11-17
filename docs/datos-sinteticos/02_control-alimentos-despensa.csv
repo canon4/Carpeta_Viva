@@ -1,0 +1,11 @@
+hogar,zona,producto,fecha_ingreso,perecedero,fecha_vencimiento,cantidad,unidad
+Los Almendros,Zona 2,Arroz,2026-09-01,No,2027-03-01,25,kg
+Los Almendros,Zona 2,Leche entera,2026-09-10,Si,2026-09-20,12,litro
+Los Almendros,Zona 2,Huevos,2026-09-10,Si,2026-10-01,90,unidad
+Los Almendros,Zona 2,Papa,2026-09-12,Si,2026-09-30,20,kg
+Los Almendros,Zona 2,Aceite vegetal,2026-08-20,No,2027-08-20,8,litro
+Los Almendros,Zona 2,Panela,2026-09-05,No,2027-09-05,10,kg
+Los Almendros,Zona 2,Pollo,2026-09-13,Si,2026-09-16,15,kg
+Los Almendros,Zona 2,Frijol,2026-08-25,No,2027-08-25,10,kg
+Los Almendros,Zona 2,Yogurt,2026-09-13,Si,2026-09-18,24,unidad
+Los Almendros,Zona 2,Verduras surtidas,2026-09-13,Si,2026-09-17,10,kg

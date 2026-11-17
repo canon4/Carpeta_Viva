@@ -1,4 +1,5 @@
-# Demo local y base para el VPS. Frontend y backend se despliegan por separado.
+# Solo para demo local. En el VPS, backend y frontend se despliegan como apps separadas en
+# Dokploy, sin este compose (ver docs/adr/0012-despliegue-dokploy.md).
 name: carpeta-viva
 
 services:
@@ -50,19 +51,60 @@ services:
       CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:8080"]}
       ARCHIVOS_DIR: /data/archivos
       ARCHIVOS_CLAVE_MAESTRA: ${ARCHIVOS_CLAVE_MAESTRA}
+      # Alertas de evasión (ADR-0009)
+      POLICIA_INFANCIA_TELEFONO: ${POLICIA_INFANCIA_TELEFONO}
+      # Asistente de IA (ADR-0010): LLM externo intercambiable + embeddings locales
+      IA_LLM_PROVEEDOR: ${IA_LLM_PROVEEDOR:-anthropic}
+      IA_LLM_MODELO: ${IA_LLM_MODELO:-claude-haiku-5-5}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      IA_EMBEDDINGS_MODELO: ${IA_EMBEDDINGS_MODELO:-intfloat/multilingual-e5-small}
+      IA_EMBEDDINGS_VERSION: ${IA_EMBEDDINGS_VERSION:-1}
+      IA_ANONIMIZADO_POR_DEFECTO: ${IA_ANONIMIZADO_POR_DEFECTO:-true}
+      IA_INDEXAR_AUTOMATICAMENTE: ${IA_INDEXAR_AUTOMATICAMENTE:-true}
+      IA_INDEXACION_PENDIENTE_UMBRAL_MINUTOS: ${IA_INDEXACION_PENDIENTE_UMBRAL_MINUTOS:-60}
     volumes:
       - archivos:/data/archivos
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   frontend:
-    image: nginx:1.27-alpine
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     volumes:
-      - ${FRONTEND_DIST:-./frontend/dist/frontend/browser}:/usr/share/nginx/html:ro
       - ./infra/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      # config.json se lee en tiempo de ejecución (nunca se compila, ver frontend/CLAUDE.md).
+      # Este archivo pisa el que el Dockerfile copió al construir la imagen, que es el de
+      # desarrollo local (public/config.json, con accesosRapidosDesarrollo en true) — en
+      # Docker/VPS siempre debe quedar el de aquí, con los accesos rápidos desactivados.
+      - ./infra/frontend/config.json:/usr/share/nginx/html/config.json:ro
     ports:
       - "8080:80"
+
+  # Datos sintéticos de demo (NO activar en un entorno que pueda llegar a ser producción).
+  # No se levanta con `docker compose up`: solo con el perfil "demo" explícito, p. ej.
+  #   docker compose --profile demo up -d seed
+  # o, sin perfil, a mano contra un stack ya corriendo:
+  #   docker compose exec backend python scripts/seed_sintetico.py
+  seed:
+    build: ./backend
+    profiles: ["demo"]
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      ARCHIVOS_CLAVE_MAESTRA: ${ARCHIVOS_CLAVE_MAESTRA}
+    command: ["python", "scripts/seed_sintetico.py"]
 
 volumes:
   pgdata:

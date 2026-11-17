@@ -1,0 +1,27 @@
+{
+  "codigo_interno": "NNA-0231",
+  "nombres": "Sebastián",
+  "apellidos": "Londoño Paz",
+  "fecha_nacimiento": "2016-04-12",
+  "documento_identidad": {
+    "tipo": "Registro Civil",
+    "numero": "SIM-0231-RC"
+  },
+  "sexo": "Masculino",
+  "fecha_ingreso_hogar": "2025-11-03",
+  "hogar_sustituto": "Los Almendros",
+  "zona": "Zona 2",
+  "operador": "Fundación Fundar",
+  "defensor_asignado": "Juan Carlos Restrepo Villa",
+  "profesional_psicosocial": "Carolina Méndez Ríos",
+  "padre": {
+    "nombres": "No identificado",
+    "estado": "En investigación"
+  },
+  "madre": {
+    "nombres": "Luz Dary Paz Correa",
+    "estado": "Con restricción de visitas - en proceso administrativo"
+  },
+  "historial_medico_resumen": "Sin antecedentes relevantes. Esquema de vacunación completo a la fecha de ingreso.",
+  "observacion": "Datos sinteticos de prueba, no corresponden a una persona real."
+}
