@@ -8,7 +8,7 @@ ADR-0008 exigía que la madre tuviera permiso de lectura de la sección (concedi
 ## Decisión
 1. **Escribir no implica leer.** La madre puede subir documentos de cualquier categoría para un menor asignado a su hogar vigente. Si el menor no está en su hogar o el expediente está archivado, sigue recibiendo 403.
 2. **Con permiso de lectura de la sección**, el documento nace en `borrador`, como antes.
-3. **Sin permiso de lectura**, el documento nace directamente `en_revision`. Ella no puede abrirlo, así que no tendría cómo enviarlo a revisión. No aparece en su lista ni lo puede descargar.
+3. **Sin permiso de lectura**, el documento nace directamente `en_revision`. Ella no puede abrirlo, así que no tendría cómo enviarlo a revisión. En su lista aparece con `reservado: true`: solo ve título, categoría, estado y fecha, que son datos que ella misma escribió. No tiene enlace y no puede ver ni descargar el contenido. Si el menor sale de su hogar, también se le oculta (RF7).
 4. **No hay acceso a documentos ajenos.** Sin permiso de lectura, la madre no puede versionar ni enviar documentos de esa sección creados por otra persona (por ejemplo, el borrador de una madre anterior del mismo hogar).
 5. Si el profesional lo devuelve, la corrección la gestiona el profesional. La madre solo puede corregir lo que puede leer.
 
