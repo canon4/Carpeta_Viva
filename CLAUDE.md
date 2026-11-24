@@ -96,6 +96,7 @@ Enrutamiento
 8. Sin GPU declarada: IA por API. Sin integraciones externas por ahora. Presupuesto sin definir.
 9. Sin profesionales disponibles para pruebas de usuario.
 10. URLs de los repositorios remotos de backend y frontend.
+11. Base legal para tratar la foto de perfil de madres y profesionales (adultos, Ley 1581/2012); ver ADR-0019.
 
 ## Reglas del proyecto
 - Nunca datos reales de menores en desarrollo ni pruebas.
