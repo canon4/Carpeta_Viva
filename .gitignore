@@ -14,3 +14,7 @@ Thumbs.db
 __pycache__/
 node_modules/
 .venv/
+package-lock.json
+
+# Skills de Claude Code instalados localmente (datos de la herramienta, no del proyecto)
+.claude/skills/
