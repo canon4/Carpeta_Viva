@@ -97,6 +97,7 @@ Enrutamiento
 9. Sin profesionales disponibles para pruebas de usuario.
 10. URLs de los repositorios remotos de backend y frontend.
 11. Base legal para tratar la foto de perfil de madres y profesionales (adultos, Ley 1581/2012); ver ADR-0019.
+12. Instalar el binario `tesseract` (OCR, paquete de idioma `spa`) en el servidor/VPS: sin él, las fotos y el papel escaneado no se indexan para el asistente de IA (PDF, Word y Excel con texto nativo ya se indexan sin esa dependencia).
 
 ## Reglas del proyecto
 - Nunca datos reales de menores en desarrollo ni pruebas.
